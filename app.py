@@ -7,7 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import json, os
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, redirect, url_for
-
+app = Flask(__name__)
 
 TX_FILE = "transactions.json"
 
