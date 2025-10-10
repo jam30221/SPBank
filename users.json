@@ -1,0 +1,24 @@
+[
+  {
+    "username": "jameswhilfred",
+    "password": "test123",
+    "pin": "251978",
+    "email": "jam30221@gmail.com",
+    "account_number": "765904281",
+    "balance": 32102125,
+    "deposits_total": 37267.345,
+    "withdrawals_total": 15000,
+    "transfers_total": 510220,
+    "transactions": [
+      {
+        "type": "Deposit",
+        "amount": 1000,
+        "status": "Success",
+        "owner": "jameswhilfred",
+        "timestamp": "01-Oct-2025 10:50:00",
+        "checksum": "abc123"
+      }
+    ],
+    "avatar": "jameswhilfred_avatar.jpeg"
+  }
+]

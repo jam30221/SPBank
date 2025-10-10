@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="transfer-form">
+  <h2>Tax Payment Verification</h2>
+  <p>Please enter your Tax Payment Code to continue processing your transfer.</p>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" action="{{ url_for('transfer_tax') }}">
+    <div class="form-group">
+      <label for="tax_code">Tax Payment Code</label>
+      <input type="password" id="tax_code" name="tax_code" required>
+    </div>
+    <button type="submit" class="btn-primary">Verify & Complete Transfer</button>
+  </form>
+</section>
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="transfer-form">
+  <h2>Transfer Pending</h2>
+  <p>Your transfer request has been received and is awaiting Tax Payment Code verification.</p>
+
+  <!-- Show pending details -->
+  <div class="pending-box">
+    <p><strong>Recipient:</strong> {{ details.first_name }} {{ details.middle_name }} {{ details.last_name }}</p>
+    <p><strong>Bank:</strong> {{ details.bank_name }}</p>
+    <p><strong>Account:</strong> {{ details.account_number }}</p>
+    <p><strong>Routing:</strong> {{ details.routing_number }}</p>
+    <p><strong>Amount:</strong> ${{ details.amount }}</p>
+  </div>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Tax Code Form -->
+  <form method="POST" action="{{ url_for('transfer_tax') }}">
+    <div class="form-group">
+      <label for="tax_code">Enter Tax Payment Code</label>
+      <input type="password" id="tax_code" name="tax_code" required>
+    </div>
+    <button type="submit" class="btn-primary">Verify & Deliver Transfer</button>
+  </form>
+</section>
+
+{% endblock %}

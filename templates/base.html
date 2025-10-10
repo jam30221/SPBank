@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ SITE_NAME }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Open+Sans&display=swap" rel="stylesheet">
+</head>
+<body class="theme">
+
+  <!-- Turquoise contact bar -->
+  <header class="topbar">
+    <div class="left">
+      <span class="contact">📞 {{ CONTACT_PHONE }}</span>
+      <span class="contact">✉️ {{ CONTACT_EMAIL }}</span>
+    </div>
+    <div class="right">
+      {% if 'user' in session %}
+        <a href="{{ url_for('dashboard') }}" class="link">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="link">Log Out</a>
+      {% else %}
+        <a href="{{ url_for('login_view') }}" class="link">Login</a>
+        <a href="{{ url_for('support') }}" class="link">Support</a>
+      {% endif %}
+    </div>    
+  </header>
+
+  <!-- Branding block -->
+  <header class="branding">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="SPB Logo" class="logo-img">
+    <h1 class="brand-text">SPARTEX PRIVATE BANKING</h1>
+  </header>
+
+  <!-- Navigation -->
+  {% if request.endpoint == 'index' %}
+<nav class="navbar">
+  <ul>
+    <li><a href="{{ url_for('index') }}">Home</a></li>
+    <li><a href="{{ url_for('about') }}">About</a></li>
+    <li><a href="{{ url_for('login_view') }}">Login</a></li>
+    <li><a href="{{ url_for('signup') }}">Register</a></li>
+    <li><a href="{{ url_for('support') }}">Support</a></li>
+  </ul>
+</nav>
+{% endif %}
+
+
+<main class="container">
+  {% block content %}{% endblock %}
+</main>
+
+
+  <!-- Script must be inside body, before closing -->
+  <script>
+document.addEventListener("DOMContentLoaded", async function() {
+  const testimonialQuotes = [
+    "Spartex Private Banking has been a trusted partner in my financial journey.",
+    "Their secure platform gives me confidence to expand globally.",
+    "I appreciate the professionalism and discretion in every transaction.",
+    "With Spartex, I feel like I have a local partner anywhere in the world.",
+    "Their offshore infrastructure is unmatched in safety and reliability."
+  ];
+
+  async function fetchRandomUsers(count = 50) {
+    const res = await fetch(`https://randomuser.me/api/?results=${count}&nat=us,gb,ca,au`);
+    const data = await res.json();
+    return data.results.map(u => ({
+      name: u.name.first + " " + u.name.last,
+      role: ["Investor","Entrepreneur","Consultant","Trader","Banker"][Math.floor(Math.random()*5)],
+      quote: testimonialQuotes[Math.floor(Math.random()*testimonialQuotes.length)],
+      photo: u.picture.large
+    }));
+  }
+
+  let testimonials = await fetchRandomUsers(100);
+  let currentIndex = 0;
+  const perPage = 3; // show 3 at a time
+  const row = document.getElementById("testimonial-row");
+  const counterEl = document.getElementById("counter");
+
+  function showTestimonials() {
+    row.classList.remove("show");
+    setTimeout(() => {
+      row.innerHTML = "";
+      for (let i = 0; i < perPage; i++) {
+        const t = testimonials[(currentIndex + i) % testimonials.length];
+        const div = document.createElement("div");
+        div.className = "testimonial";
+        div.innerHTML = `
+          <img src="${t.photo}" alt="${t.name}">
+          <h3>${t.name}</h3>
+          <p class="role">${t.role}</p>
+          <blockquote>"${t.quote}"</blockquote>
+        `;
+        row.appendChild(div);
+      }
+      counterEl.textContent = (currentIndex + 1);
+      row.classList.add("show");
+    }, 300);
+  }
+
+  function nextTestimonials() {
+    currentIndex = (currentIndex + perPage) % testimonials.length;
+    showTestimonials();
+  }
+
+  function prevTestimonials() {
+    currentIndex = (currentIndex - perPage + testimonials.length) % testimonials.length;
+    showTestimonials();
+  }
+
+  // Attach arrow events
+  document.querySelector(".arrow.next").addEventListener("click", nextTestimonials);
+  document.querySelector(".arrow.prev").addEventListener("click", prevTestimonials);
+
+  // Initialize
+  showTestimonials();
+  setInterval(nextTestimonials, 6000); // auto-rotate every 6s
+});
+</script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Hero slider
+  const slides = document.querySelectorAll(".hero .slide");
+  let currentSlide = 0;
+
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.classList.remove("active");
+      if (i === index) {
+        slide.classList.add("active");
+      }
+    });
+  }
+
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % slides.length;
+    showSlide(currentSlide);
+  }
+
+  // Initialize
+  showSlide(currentSlide);
+  setInterval(nextSlide, 5000); // change every 5 seconds
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const slides = document.querySelectorAll(".hero .slide");
+  const dotsContainer = document.querySelector(".hero .dots");
+  let currentSlide = 0;
+
+  // Create dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement("span");
+    if (i === 0) dot.classList.add("active");
+    dot.addEventListener("click", () => {
+      currentSlide = i;
+      showSlide(currentSlide);
+    });
+    dotsContainer.appendChild(dot);
+  });
+  const dots = dotsContainer.querySelectorAll("span");
+
+  function showSlide(index) {
+    slides.forEach((slide, i) => slide.classList.toggle("active", i === index));
+    dots.forEach((dot, i) => dot.classList.toggle("active", i === index));
+  }
+
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % slides.length;
+    showSlide(currentSlide);
+  }
+
+  setInterval(nextSlide, 5000);
+});
+</script>
+
+<script>
+function toggleMenu() {
+  document.getElementById("sideMenu").classList.toggle("open");
+}
+
+// Close menu if clicking outside
+document.addEventListener("click", function(event) {
+  const menu = document.getElementById("sideMenu");
+  const hamburger = document.querySelector(".hamburger");
+  if (menu.classList.contains("open") && !menu.contains(event.target) && !hamburger.contains(event.target)) {
+    menu.classList.remove("open");
+  }
+});
+</script>
+
+<script>
+function togglePassword(fieldId, checkboxId) {
+  const field = document.getElementById(fieldId);
+  const checkbox = document.getElementById(checkboxId);
+  if (checkbox.checked) {
+    field.type = "text";   // reveal
+  } else {
+    field.type = "password"; // hide
+  }
+}
+</script>
+
+<script>
+function openAvatarMenu() {
+  document.getElementById('avatar-menu').classList.toggle('hidden');
+}
+
+function viewAvatar() {
+  const avatar = document.getElementById('user-avatar').src;
+  window.open(avatar, '_blank');
+}
+
+function uploadAvatar(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('user-avatar').src = e.target.result;
+    }
+    reader.readAsDataURL(input.files[0]);
+    // ⚠️ Commander: This only updates client-side preview.
+    // To persist, you’ll need a Flask route to save the file.
+  }
+}
+</script>
+
+<script>
+function toggleAvatarMenu() {
+  document.getElementById('avatar-menu').classList.toggle('hidden');
+}
+function viewAvatar() {
+  const avatar = document.getElementById('user-avatar').src;
+  window.open(avatar, '_blank');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="support-form">
+  <h2>Submit a Complaint</h2>
+  <form method="post" action="/support">
+    <label>First Name</label>
+    <input type="text" name="first_name" required>
+
+    <label>Last Name</label>
+    <input type="text" name="last_name" required>
+
+    <label>Contact Email</label>
+    <input type="email" name="email" required>
+
+    <label>Contact Phone</label>
+    <input type="tel" name="phone">
+
+    <label>Complaint ID</label>
+    <input type="text" name="complaint_id" required>
+
+    <label>Your Complaint</label>
+    <textarea name="complaint_text" rows="5" required></textarea>
+
+    <button type="submit">Submit</button>
+  </form>
+</section>
+{% endblock %}

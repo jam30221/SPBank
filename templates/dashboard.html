@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Header -->
+<div class="login-header">
+  <!-- Hamburger button -->
+  <span class="hamburger" onclick="toggleSidebar()">☰</span>
+</div>
+
+
+<div class="dashboard">
+
+  <!-- Sidebar -->
+  <aside class="sidebar closed">
+    <div class="avatar">
+      <div class="avatar" onclick="toggleAvatarMenu()">
+  <form action="{{ url_for('upload_avatar') }}" method="POST" enctype="multipart/form-data">
+    <label for="avatar-upload">
+      <img id="user-avatar"
+           src="{{ url_for('static', filename='uploads/avatars/' + user.get('avatar', 'default-avatar.png')) }}"
+           alt="User Avatar">
+    </div>
+
+  <div id="avatar-menu" class="avatar-menu hidden">
+    
+  <button onclick="viewAvatar()">View Picture</button>
+  <form action="{{ url_for('upload_avatar') }}" method="POST" enctype="multipart/form-data" style="margin:0;">
+    <input type="file" id="avatar-upload" name="avatar" accept="image/*" style="display:none;" onchange="this.form.submit()">
+    <button type="button" onclick="document.getElementById('avatar-upload').click()">Change Picture</button>
+  </form>
+  
+  <form action="{{ url_for('remove_avatar') }}" method="POST" style="margin:0;">
+    <button type="submit">Remove Picture</button>
+  </form>
+</div>
+
+
+    </div>
+    <div class="sidebar-title">James Whilfred</div>
+    <a class="side-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a class="side-link" href="{{ url_for('home') }}">Home</a>
+    <a class="side-link" href="{{ url_for('accounts') }}">My Accounts</a>
+    <a class="side-link" href="{{ url_for('deposits') }}">Deposits</a>
+    <a class="side-link" href="{{ url_for('withdrawals') }}">Withdrawals</a>
+    <a class="side-link" href="{{ url_for('transfers') }}">Transfers</a>
+    <a class="side-link" href="{{ url_for('history') }}">Transaction History</a>
+    <a class="side-link" href="{{ url_for('reports') }}">Reports</a>
+    <a class="side-link" href="{{ url_for('logout') }}">Log Out</a>
+  </aside>
+
+  <!-- Main Panel -->
+  <section class="mainpanel expanded">
+    <div class="welcome">
+      <div class="name">Welcome, James!</div>
+      <div class="acct">You logged in at: {{ login_time }}</div>
+      <div class="acct">Acc Number: SPB410020019</div>
+      <div class="acct">Routing Number: 765904281</div>
+    </div>
+
+    <!-- Summary Boxes -->
+    <div class="summary-grid">
+      <div class="summary-card red">
+        <div class="label">Withdrawals</div>
+        <div class="value">US$ 15,000</div>
+      </div>
+      <div class="summary-card green">
+        <div class="label">Total Transfers</div>
+        <div class="value">US$ 5,150,220</div>
+      </div>
+      <div class="summary-card yellow">
+        <div class="label">Wallet Balance</div>
+        <div class="value">US$ 32,102,125</div>
+      </div>
+      <div class="summary-card blue">
+        <div class="label">Deposits</div>
+        <div class="value">US$ 37,267.345</div>
+      </div>
+    </div>
+
+    <!-- Latest Transactions -->
+    <h3 class="section-title">Latest Transactions</h3>
+    <table class="tx-table">
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Transaction Type</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Acc Owner</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+
+    <!-- New dynamic transactions first -->
+    {% for tx in transactions %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ tx.type }}</td>
+        <td>US$ {{ tx.amount }}</td>
+        <td>
+          {% if tx.status == "pending_tax" %}
+            <a href="{{ url_for('transfer_tax') }}" class="pending">Pending – Awaiting Tax Code</a>
+          {% elif tx.status == "completed" %}
+            <span class="success">Completed</span>
+          {% else %}
+            {{ tx.status }}
+          {% endif %}
+        </td>
+        <td>{{ tx.recipient }}</td>
+        <td>{{ tx.created_at }}</td>
+      </tr>
+     {% endfor %}
+        <tr><td>1</td><td>Transfer</td><td>US$ 15,000</td><td class="pending">Pending</td><td>James Miles</td><td>17-Oct-2020</td></tr>
+        <tr><td>2</td><td>Deposit</td><td>US$ 1,200</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
+        <tr><td>3</td><td>Deposit</td><td>US$ 1,500</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
+        <tr><td>4</td><td>Deposit</td><td>US$ 2,000</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
+        <tr><td>5</td><td>Deposit</td><td>US$ 1,500</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
+        <tr><td>6</td><td>Deposit</td><td>US$ 1,200</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
+        <tr><td>7</td><td>Deposit</td><td>US$ 1,500</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
+        <tr><td>8</td><td>Deposit</td><td>US$ 2,000</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
+        <tr><td>9</td><td>Deposit</td><td>US$ 1,500</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
+        <tr><td>10</td><td>Deposit</td><td>US$ 1,200</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Transaction Checksums -->
+    <h3 class="section-title">Transaction Checksums</h3>
+    <table class="tx-table">
+      <thead>
+        <tr>
+          <th>Checksum</th>
+          <th>Acc Number</th>
+          <th>Transaction Type</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>oAuLzZG6EoHQPBrgetxX</td><td>765904281</td><td>Deposit</td><td>US$ 289.121</td></tr>
+        <tr><td>f4jiL8QWcPmRo8cafvdE</td><td>765904281</td><td>Deposit</td><td>US$ 289.121</td></tr>
+        <tr><td>6a1nP1zPnAS8gry4MfW1</td><td>765904281</td><td>Withdrawal</td><td>US$ 15,000</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+</div>
+
+<script>
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('closed');
+}
+document.addEventListener('click', function(e) {
+  const sidebar = document.querySelector('.sidebar');
+  const hamburger = document.querySelector('.hamburger');
+  if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+    sidebar.classList.add('closed');
+  }
+});
+</script>
+{% endblock %}

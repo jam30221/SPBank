@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Transaction History - {{ username }}</h2>
+  <table class="tx-table">
+    <thead>
+      <tr>
+        <th>Checksum</th>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in transactions %}
+      <tr>
+        <td class="mono">{{ t.checksum }}</td>
+        <td>{{ t.type }}</td>
+        <td>{{ fmt_amount(t.amount) }}</td>
+        <td>{{ t.status }}</td>
+        <td>{{ t.timestamp }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

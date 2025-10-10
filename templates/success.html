@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="success">
+  <div class="progressbar">
+    <div class="step done">1</div>
+    <div class="line done"></div>
+    <div class="step done">2</div>
+    <div class="line done"></div>
+    <div class="step active">3</div>
+  </div>
+  <p class="progress-labels">
+    <span>Fill Form</span>
+    <span>Review</span>
+    <span>Submitted</span>
+  </p>
+
+  <h2>Application Submitted Successfully</h2>
+  <p>Your application has been received and is now being processed.  
+     Our team will contact you shortly with next steps.</p>
+  <a href="{{ url_for('index') }}" class="btn">Return to Homepage</a>
+</section>
+{% endblock %}

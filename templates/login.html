@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Top contact bar -->
+<div class="topbar">
+  <div class="left">
+  </div>
+</div>
+
+<!-- Login page header -->
+<header class="login-header">
+  <!-- Hamburger menu -->
+  <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+
+  <!-- Centered welcome text -->
+  <h2 class="welcome-text">Welcome! Login Now</h2>
+
+  <!-- Hidden nav menu (slides out when hamburger clicked) -->
+  <nav id="sideMenu" class="side-menu">
+    <a href="/">Home</a>
+    <a href="/about">About</a>
+    <a href="/login">Login</a>
+    <a href="/signup">Register</a>
+    <a href="/support">Support</a>
+  </nav>
+</header>
+
+<!-- Login form -->
+<section class="login-container">
+  <div class="login-card">
+
+    {% if error_message %}
+      <p class="error-msg">{{ error_message }}</p>
+    {% endif %}
+
+    <form method="post" action="/login" autocomplete="off">
+  <label for="username">Username</label>
+  <input
+    type="text"
+    id="username"
+    name="username"
+    autocomplete="username"
+    required
+  >
+
+  <label for="password">Password</label>
+  <input
+    type="password"
+    id="password"
+    name="password"
+    autocomplete="current-password"
+    required
+  >
+  <div class="toggle-row">
+    <input type="checkbox" id="showPassword" onclick="togglePassword('password','showPassword')">
+    <label for="showPassword">Show Password</label>
+  </div>
+
+  <label for="pin">Security PIN</label>
+  <input
+    type="password"
+    id="pin"
+    name="pin"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    maxlength="6"
+    autocomplete="one-time-code"
+    required
+  >
+  <div class="toggle-row">
+    <input type="checkbox" id="showPin" onclick="togglePassword('pin','showPin')">
+    <label for="showPin">Show PIN</label>
+  </div>
+
+  <div class="assist-links">
+    <a href="{{ url_for('forgot_username_view') }}">Forgot Username?</a>
+    <a href="{{ url_for('forgot_password_view') }}">Forgot Password?</a>
+    <a href="{{ url_for('reset_pin_view') }}">Reset PIN</a>
+    <a href="{{ url_for('login_view') }}">Back to Login</a>
+  </div>
+
+  <div class="verify-human">
+    <input type="checkbox" id="human" required>
+    <label for="human">Verify you are a human</label>
+  </div>
+
+  <button type="submit" class="btn primary">Login</button>
+</form>
+  </div>
+</section>
+
+{% endblock %}

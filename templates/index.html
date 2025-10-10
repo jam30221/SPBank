@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Hero with background and slider -->
+<section class="hero" style="background-image: url('{{ url_for('static', filename='bank-bg.jpg') }}');">
+  <div class="overlay">
+    <div class="slider">
+      <div class="slide active">
+        <h1>Welcome To Spartex Private Banking</h1>
+        <h2>Invest And Conduct International Business.</h2>
+        <p>Our technology and coverage provide you with worldwide access, allowing you to provide your clients with a local payment experience.</p>
+      </div>
+      <div class="slide">
+        <h2>Confident Banking</h2>
+        <p>With decades of expertise, Spartex Private Banking ensures your assets are managed with precision and discretion.</p>
+      </div>
+      <div class="slide">
+        <h2>Safe & Secure</h2>
+        <p>Our offshore infrastructure is fortified with advanced encryption and compliance with international standards.</p>
+      </div>
+      <div class="slide">
+        <h2>Global Reach</h2>
+        <p>Access your accounts worldwide while enjoying the personalized experience of a local partner bank.</p>
+      </div>
+      </div>
+    <!-- Dot indicators inside overlay -->
+    <div class="dots"></div>
+  </div>
+</section>
+      <div class="slide">
+        <h2>01 Convenient</h2>
+        <p>Enjoy the convenience of banking from any location!</p>
+      </div>
+      <div class="slide">
+        <h2>02 Secure</h2>
+        <p>You may bank with us safely and securely from any location!</p>
+      </div>
+      <div class="slide">
+        <h2>03 Reliable</h2>
+        <p>Worldwide access with a local payment experience.</p>
+      </div>
+    </div>
+  
+
+<!-- Professional sections remain below -->
+<section class="features">
+  <div class="feature">
+    <h3>Trusted Advisors</h3>
+    <p>Our experts provide tailored solutions for international clients.</p>
+  </div>
+  <div class="feature">
+    <h3>Compliance First</h3>
+    <p>We adhere to global banking regulations to protect your assets.</p>
+  </div>
+  <div class="feature">
+    <h3>Client Focused</h3>
+    <p>Your success is our mission, with 24/7 support worldwide.</p>
+  </div>
+</section>
+
+<section class="vision">
+  <h2>Our Vision</h2>
+  <p>
+    At Spartex Private Banking, our vision is to be the most trusted partner in global finance —
+    safeguarding your Wealth, Business Investments, and Assets with uncompromising security, while empowering you to grow confidently
+    into the future. We are committed to innovation, transparency, and excellence, ensuring that
+    every client enjoys a safe, reliable, and personalized banking experience, Privately and internationally. Together, we build
+    the foundations for sustainable economic growth and prosperity for generations to come.
+  </p>
+</section>
+
+<!-- Unified Testimonials Carousel -->
+<section class="testimonials">
+  <h2>What Our Clients Say</h2>
+
+  <div class="testimonial-wrapper">
+    <button class="arrow prev">&#10094;</button>
+
+    <div class="testimonial-row" id="testimonial-row">
+      <!-- JS will inject 3–5 testimonials here -->
+    </div>
+
+    <button class="arrow next">&#10095;</button>
+  </div>
+
+  <!-- Counter positioned just below the row -->
+  <div class="testimonial-counter">
+    Testimonial <span id="counter"></span> / 5200
+  </div>
+
+  <!-- Dots navigation -->
+  <div class="dots" id="testimonial-dots"></div>
+</section>
+
+<!-- Our Staff Section -->
+<section class="staff">
+  <h2>Meet Our Team</h2>
+  <div class="staff-cards">
+    <div class="staff-member">
+      <img src="https://randomuser.me/api/portraits/men/12.jpg" alt="Staff 1">
+      <h3>Michael Carter</h3>
+      <p>Chief Executive Officer</p>
+    </div>
+    <div class="staff-member">
+      <img src="https://randomuser.me/api/portraits/women/19.jpg" alt="Staff 2">
+      <h3>Sophia Lee</h3>
+      <p>Head of Compliance</p>
+    </div>
+    <div class="staff-member">
+      <img src="https://randomuser.me/api/portraits/men/44.jpg" alt="Staff 3">
+      <h3>David Johnson</h3>
+      <p>Chief Financial Officer</p>
+    </div>
+    <div class="staff-member">
+      <img src="https://randomuser.me/api/portraits/women/56.jpg" alt="Staff 4">
+      <h3>Isabella Martinez</h3>
+      <p>Client Relations Manager</p>
+    </div>
+    <div class="staff-member">
+      <img src="https://randomuser.me/api/portraits/men/77.jpg" alt="Staff 5">
+      <h3>James Smith</h3>
+      <p>Head of Security</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
