@@ -27,10 +27,12 @@
   </header>
 
   <!-- Branding block -->
-  <header class="branding">
+    <header class="hero-banner">
+  <div class="hero-overlay">
     <img src="{{ url_for('static', filename='logo.png') }}" alt="SPB Logo" class="logo-img">
-    <h1 class="brand-text">SPARTEX PRIVATE BANKING</h1>
-  </header>
+    <h1 class="brand-text">SPARTEX PRIVATE INTL BANKING</h1>
+  </div>
+</header>
 
   <!-- Navigation -->
   {% if request.endpoint == 'index' %}
@@ -194,15 +196,15 @@ document.addEventListener("click", function(event) {
 </script>
 
 <script>
-function togglePassword(fieldId, checkboxId) {
-  const field = document.getElementById(fieldId);
-  const checkbox = document.getElementById(checkboxId);
-  if (checkbox.checked) {
-    field.type = "text";   // reveal
-  } else {
-    field.type = "password"; // hide
-  }
-}
+  document.getElementById('showPassword').addEventListener('change', function() {
+    const pwd = document.getElementById('password');
+    pwd.type = this.checked ? 'text' : 'password';
+  });
+
+  document.getElementById('showPin').addEventListener('change', function() {
+    const pin = document.getElementById('pin');
+    pin.type = this.checked ? 'text' : 'password';
+  });
 </script>
 
 <script>

@@ -241,10 +241,13 @@ body.theme {
 }
 
 .login-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 40px;
+    background: url("/static/login-bg2.avif") no-repeat center center;
+    background-size: cover;
+    padding: 3rem 0;              /* space above/below */
+    display: flex;
+    justify-content: center;
+
+    align-items: center;
 }
 
 .login-card {
@@ -658,3 +661,69 @@ body.theme {
   .form-group input { font-size: 14px; }
   .btn-primary { font-size: 16px; }
 }
+
+.assist-links a {
+    display: block;
+    font-size: 0.9rem;
+    color: #5c4af7;
+    margin-top: 0.25rem;
+    text-decoration: none;
+  }
+
+.assist-links a:hover {
+    text-decoration: underline;
+    color: #4e4646;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Logo background only */
+.logo-area {
+  background: url("{{ url_for('static', filename='logo-bg.jpg') }}") no-repeat center center;
+  background-size: cover;
+  padding: 1rem;              /* space around logo */
+  display: flex;
+  justify-content: center;    /* center the logo horizontally */
+  align-items: center;        /* center vertically if taller */
+}
+
+/* Full-page banner background */
+.hero-banner {
+  width: 100%;
+  min-height: 250px;       /* adjust height as needed */
+  background: url("/static/Logo-bg.jpg") no-repeat center center;
+  background-size: cover;  /* ensures full coverage */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+/* Optional overlay for readability */
+.hero-overlay {
+  background: rgba(0,0,0,0.4);  /* semi-transparent dark layer */
+  padding: 2rem;
+  text-align: center;
+  border-radius: 6px;
+}
+
+/* Logo styling */
+.bank-logo {
+  max-height: 90px;
+  margin-bottom: 0.5rem;
+}
+
+/* Bank name styling */
+.bank-name {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+}
+

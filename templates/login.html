@@ -1,6 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
 
+<style>
+  /* Full-page background */
+  body {
+    background: url("{{ url_for('static', filename='login-bg2.avif') }}") no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+</style>
+
 <!-- Top contact bar -->
 <div class="topbar">
   <div class="left">
@@ -13,7 +24,7 @@
   <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
 
   <!-- Centered welcome text -->
-  <h2 class="welcome-text">Welcome! Login Now</h2>
+  <h3 class="welcome-text">Welcome! Login Now</h3>
 
   <!-- Hidden nav menu (slides out when hamburger clicked) -->
   <nav id="sideMenu" class="side-menu">
@@ -25,6 +36,7 @@
   </nav>
 </header>
 
+
 <!-- Login form -->
 <section class="login-container">
   <div class="login-card">
@@ -33,59 +45,50 @@
       <p class="error-msg">{{ error_message }}</p>
     {% endif %}
 
-    <form method="post" action="/login" autocomplete="off">
-  <label for="username">Username</label>
-  <input
-    type="text"
-    id="username"
-    name="username"
-    autocomplete="username"
-    required
-  >
+  
+     <!-- ✅ Proper form wrapper -->
+    <form action="{{ url_for('login_view') }}" method="POST">
 
-  <label for="password">Password</label>
-  <input
-    type="password"
-    id="password"
-    name="password"
-    autocomplete="current-password"
-    required
-  >
-  <div class="toggle-row">
-    <input type="checkbox" id="showPassword" onclick="togglePassword('password','showPassword')">
-    <label for="showPassword">Show Password</label>
-  </div>
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+      </div>
 
-  <label for="pin">Security PIN</label>
-  <input
-    type="password"
-    id="pin"
-    name="pin"
-    inputmode="numeric"
-    pattern="[0-9]*"
-    maxlength="6"
-    autocomplete="one-time-code"
-    required
-  >
-  <div class="toggle-row">
-    <input type="checkbox" id="showPin" onclick="togglePassword('pin','showPin')">
-    <label for="showPin">Show PIN</label>
-  </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+      </div>
 
-  <div class="assist-links">
-    <a href="{{ url_for('forgot_username_view') }}">Forgot Username?</a>
-    <a href="{{ url_for('forgot_password_view') }}">Forgot Password?</a>
-    <a href="{{ url_for('reset_pin_view') }}">Reset PIN</a>
-    <a href="{{ url_for('login_view') }}">Back to Login</a>
-  </div>
+      <div class="mb-3">
+        <label for="pin" class="form-label">Security PIN</label>
+        <input type="password" class="form-control" id="pin" name="pin" placeholder="Enter PIN" required>
+      </div>
 
-  <div class="verify-human">
-    <input type="checkbox" id="human" required>
-    <label for="human">Verify you are a human</label>
-  </div>
+      <div class="d-flex justify-content-center mb-2">
+        <label for="showPassword" class="me-2 mb-0">Show Password</label>
+        <input type="checkbox" id="showPassword">
+      </div>
 
-  <button type="submit" class="btn primary">Login</button>
-</form>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <label for="showPin" class="mb-0">Show PIN</label>
+        <input type="checkbox" id="showPin">
+      </div>
+
+      <div class="assist-links">
+        <a href="{{ url_for('forgot_username_view') }}">Forgot Username?</a>
+        <a href="{{ url_for('forgot_password_view') }}">Forgot Password?</a>
+        <a href="{{ url_for('reset_pin_view') }}">Reset PIN</a>
+      </div>
+
+      <div class="verify-human">
+        <input type="checkbox" id="human" required>
+        <label for="human">Verify you are a human</label>
+      </div>
+
+      <button type="submit" class="btn-primary w-100">Login</button>
+    </form>
+    <!-- ✅ Closing form is now in the right place -->
+
   </div>
 </section>
 
