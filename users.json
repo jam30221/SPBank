@@ -19,6 +19,18 @@
         "checksum": "abc123"
       }
     ],
-    "avatar": "jameswhilfred_avatar.jpeg"
+    "avatar": "jameswhilfred_avatar.jpg"
+  },
+  {
+    "username": "cmoss696",
+    "password": "Mybrother@",
+    "pin": "",
+    "email": "cindymoss696@hotmail.com",
+    "account_number": "989539219",
+    "balance": 0,
+    "deposits_total": 0,
+    "withdrawals_total": 0,
+    "transfers_total": 0,
+    "transactions": []
   }
 ]

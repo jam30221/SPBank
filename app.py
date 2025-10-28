@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from datetime import datetime
+import time
 import random
 import string
 import uuid
@@ -166,16 +167,16 @@ def avatar_helpers():
     def avatar_url(avatar_filename=None):
         # prefer explicit filename passed in, else session, else default
         av = avatar_filename or session.get('avatar') or 'ProfileAvatar.png'
-        # candidate paths
-        uploads_path = os.path.join(app.static_folder, 'uploads', 'avatars', av)
-        root_path = os.path.join(app.static_folder, av)
+        # build absolute filesystem paths using app.root_path for reliability
+        uploads_fs = os.path.join(app.root_path, 'static', 'uploads', 'avatars', av)
+        root_fs = os.path.join(app.root_path, 'static', av)
         try:
-            if av and os.path.exists(uploads_path):
-                return url_for('static', filename=os.path.join('uploads', 'avatars', av))
-            if av and os.path.exists(root_path):
+            if av and os.path.exists(uploads_fs):
+                # use forward-slash path for the URL
+                return url_for('static', filename=f'uploads/avatars/{av}')
+            if av and os.path.exists(root_fs):
                 return url_for('static', filename=av)
         except Exception:
-            # fallback if anything goes wrong with filesystem access
             pass
         return url_for('static', filename='ProfileAvatar.png')
 
@@ -263,27 +264,20 @@ def dashboard():
     if "user" not in session:
         return redirect(url_for("login_view"))
     uname = session["user"]
+    # load the canonical user record from storage (users.json) if present
+    user = get_user_by_username(uname)
+    # if we don't have a persisted user, fall back to a minimal in-memory user
+    if not user:
+        user = {"username": uname, "avatar": session.get("avatar", "ProfileAvatar.png"),
+                "balance": 0, "withdrawals_total": 0, "deposits_total": 0, "transfers_total": 0,
+                "transactions": []}
 
-    user ={"username": uname, "avatar": "default-avatar.png"}
+    # recent transactions from the transactions.json file for this user
     transactions = load_transactions()
-    user_tx = [tx for tx in transactions if tx["user"] == session["user"]]
-    
+    user_tx = [tx for tx in transactions if tx.get("user") == uname]
+
     if "login_time" not in session:
         session["login_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    return render_template(
-        "dashboard.html",
-        username=uname,
-        login_time=session.get("login_time"),
-        transactions=user_tx,
-        user=user
-    )
-
-    uname = session["user"]
-    user = get_user_by_username(uname)
-    if not user:
-        return redirect(url_for("login_view"))
-
 
     if request.method == "POST":
         action = request.form.get("action")
@@ -394,6 +388,7 @@ def dashboard():
         username=uname,
         summary=summary,
         latest=latest,
+        transactions=user_tx,
         user_list=user_list,
         login_time=login_time
     )
@@ -486,43 +481,95 @@ def transfers():
 
 @app.route("/transfer_tax", methods=["GET", "POST"])
 def transfer_tax():
-    if "user" not in session or "pending_transfer" not in session:
-        return redirect(url_for("transfers"))
+    if "user" not in session:
+        return redirect(url_for("login_view"))
 
-   
- # Get tx_id from query string (linked from dashboard or earlier redirect)
+    # Get tx_id from query string (linked from dashboard or earlier redirect)
     tx_id = request.args.get("tx_id", type=int)
-    details = session["pending_transfer"]
 
-    # Find the matching transaction
+    # Load stored transactions (if any). If tx_id is provided, try to find the
+    # persisted transaction. If no tx_id is provided, allow an in-session
+    # pending_transfer to be completed (dashboard-supplied sample row uses this).
     transactions = load_transactions()
-    tx = next((t for t in transactions if t["id"] == tx_id and t["user"] == session["user"]), None)
-    if not tx:
+    tx = None
+    if tx_id:
+        tx = next((t for t in transactions if t.get("id") == tx_id and t.get("user") == session["user"]), None)
+
+    # If we don't have a stored tx AND there's no pending_transfer in session,
+    # the request is not authorized to continue.
+    if not tx and "pending_transfer" not in session:
         flash("Transaction not found or not authorized.", "danger")
         return redirect(url_for("dashboard"))
+
+    # If tx exists but session pending_transfer is missing, rehydrate it.
+    if tx and "pending_transfer" not in session:
+        recipient = tx.get('recipient', '')
+        parts = recipient.split()
+        first = parts[0] if parts else ''
+        last = ' '.join(parts[1:]) if len(parts) > 1 else ''
+        session['pending_transfer'] = {
+            'first_name': first,
+            'last_name': last,
+            'bank_name': tx.get('bank_name', ''),
+            'account_number': tx.get('account_number', ''),
+            'routing_number': tx.get('routing_number', ''),
+            'bank_address': tx.get('bank_address', ''),
+            'recipient_number': tx.get('recipient_number', ''),
+            'amount': tx.get('amount')
+        }
+
+    details = session['pending_transfer']
 
     if request.method == "POST":
         tax_code = request.form.get("tax_code")
 
         # Replace with your real validation
         if tax_code == "123456":
-            # Update to completed
-            for t in transactions:
-                if t["id"] == tx_id:
-                    t["status"] = "completed"
-                    break
+            # If we have a stored tx_id, mark that transaction completed.
+            if tx_id:
+                for t in transactions:
+                    if t.get("id") == tx_id:
+                        t["status"] = "completed"
+                        break
+                save_transactions(transactions)
+                # Clear pending session if it was rehydrated
+                session.pop("pending_transfer", None)
+                flash(f"✅ Transfer of {details.get('amount')} to {details.get('first_name','')} {details.get('last_name','')} has been delivered!", "success")
+                return redirect(url_for("dashboard"))
+
+            # No tx_id provided: attempt to complete an ad-hoc transfer using posted fields
+            # (this happens when clicking a dashboard sample row that didn't create a persisted tx)
+            posted_amount = request.form.get('amount') or (details.get('amount') if details else None)
+            posted_recipient = request.form.get('recipient') or (f"{details.get('first_name','')} {details.get('last_name','')}" if details else None)
+
+            # Record a completed transaction for traceability
+            try:
+                new_id = (transactions[-1]["id"] + 1) if transactions else 1
+            except Exception:
+                new_id = 1
+            new_tx = {
+                "id": new_id,
+                "user": session["user"],
+                "type": "transfer",
+                "recipient": posted_recipient or "",
+                "bank_name": details.get('bank_name','') if details else '',
+                "amount": posted_amount,
+                "status": "completed",
+                "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            transactions.append(new_tx)
             save_transactions(transactions)
 
-            # Clear pending session
+            # Clear pending session (if any)
             session.pop("pending_transfer", None)
 
-            flash(f"✅ Transfer of ${details['amount']} to {details['first_name']} {details['last_name']} has been delivered!", "success")
+            flash(f"✅ Transfer of {posted_amount} to {posted_recipient} has been delivered!", "success")
             return redirect(url_for("dashboard"))
         else:
             flash("❌ Invalid Tax Payment Code. Please try again.", "danger")
 
-    # Render pending page with details
-    return render_template("transfer_pending.html", username=session["user"], details=details, tx_id=tx_id)
+    # Render tax verification page with details
+    return render_template("transfer_tax.html", username=session["user"], details=details, tx_id=tx_id)
 
 @app.route("/history")
 def history():
@@ -546,7 +593,7 @@ def logout():
     return redirect(url_for("login_view"))
 
 
-UPLOAD_FOLDER = os.path.join("static", "uploads", "avatars")
+UPLOAD_FOLDER = os.path.join(app.root_path, "static", "uploads", "avatars")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -557,11 +604,11 @@ def ensure_default_avatar_in_uploads():
     This makes the default avatar available at the uploads path so templates
     that expect files there won't show a broken image.
     """
-    static_folder = app.static_folder or 'static'
-    target_dir = os.path.join(static_folder, 'uploads', 'avatars')
+    static_root = os.path.join(app.root_path, 'static')
+    target_dir = os.path.join(static_root, 'uploads', 'avatars')
     os.makedirs(target_dir, exist_ok=True)
 
-    src = os.path.join(static_folder, 'ProfileAvatar.png')
+    src = os.path.join(static_root, 'ProfileAvatar.png')
     dst = os.path.join(target_dir, 'ProfileAvatar.png')
     try:
         if os.path.exists(src) and not os.path.exists(dst):
@@ -604,6 +651,8 @@ def upload_avatar():
 
         # Update session avatar so header shows new picture immediately
         session["avatar"] = filename
+        # bump avatar timestamp so browser fetches the latest image
+        session["avatar_ts"] = str(int(time.time()))
 
         flash("Avatar updated successfully!", "success")
     else:
@@ -634,6 +683,7 @@ def remove_avatar():
 
     # Update session avatar to default so header updates immediately
     session["avatar"] = "ProfileAvatar.png"
+    session["avatar_ts"] = str(int(time.time()))
     flash("Avatar removed, reverted to default.", "info")
 
     return redirect(url_for("dashboard"))

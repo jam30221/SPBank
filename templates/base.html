@@ -72,12 +72,12 @@
 
     <!-- Avatar block inside drawer (above the username) -->
     <div class="drawer-avatar">
-      <img id="drawer-user-avatar" src="{{ avatar_url() }}" alt="Profile avatar">
+  <img id="drawer-user-avatar" src="{{ avatar_url() }}?v={{ session.get('avatar_ts','') }}" alt="Profile avatar">
       <div class="drawer-username">{{ session.get('user', '') }}</div>
       <div class="drawer-avatar-actions">
         <button type="button" onclick="viewAvatar()">View</button>
         <form action="{{ url_for('upload_avatar') }}" method="POST" enctype="multipart/form-data" style="display:inline-block;margin:0;">
-          <input type="file" id="drawer-avatar-upload" name="avatar" accept="image/*" style="display:none;" onchange="this.form.submit()">
+          <input type="file" id="drawer-avatar-upload" name="avatar" accept="image/*" style="display:none;" onchange="previewAndSubmit(this, 'drawer-user-avatar')">
           <button type="button" onclick="document.getElementById('drawer-avatar-upload').click()">Change</button>
         </form>
         <form action="{{ url_for('remove_avatar') }}" method="POST" style="display:inline-block;margin:0;">
@@ -322,8 +322,45 @@ function openAvatarMenu() {
 }
 
 function viewAvatar() {
-  const avatar = document.getElementById('user-avatar').src;
-  window.open(avatar, '_blank');
+  // try a few known avatar element IDs (drawer, sidebar, header)
+  const ids = ['drawer-user-avatar', 'user-avatar', 'header-avatar'];
+  let src = null;
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    if (el && el.src) { src = el.src; break; }
+  }
+  if (!src) {
+    // nothing to show
+    alert('No avatar available to view.');
+    return;
+  }
+  window.open(src, '_blank');
+}
+
+/**
+ * Read a selected image file, set it as the preview src on the given image id,
+ * then submit the enclosing form. This provides an immediate preview while the
+ * form continues to upload the file to the server.
+ */
+function previewAndSubmit(input, previewId) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  if (!file.type.startsWith('image/')) {
+    alert('Please select an image file.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.getElementById(previewId);
+    if (img) img.src = e.target.result;
+    // submit the form that contains this input (if any)
+    const form = input.closest('form');
+    if (form) {
+      // small delay so preview renders before navigation
+      setTimeout(() => form.submit(), 250);
+    }
+  };
+  reader.readAsDataURL(file);
 }
 
 function uploadAvatar(input) {
@@ -341,11 +378,8 @@ function uploadAvatar(input) {
 
 <script>
 function toggleAvatarMenu() {
-  document.getElementById('avatar-menu').classList.toggle('hidden');
-}
-function viewAvatar() {
-  const avatar = document.getElementById('user-avatar').src;
-  window.open(avatar, '_blank');
+  const m = document.getElementById('avatar-menu');
+  if (m) m.classList.toggle('hidden');
 }
 </script>
 <script>

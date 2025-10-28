@@ -16,7 +16,7 @@
     {% endif %}
   {% endwith %}
 
-  <form method="POST" action="{{ url_for('transfer_tax') }}">
+  <form method="POST" action="{{ url_for('transfer_tax', tx_id=tx_id) }}">
     <div class="form-group">
       <label for="tax_code">Tax Payment Code</label>
       <input type="password" id="tax_code" name="tax_code" required>

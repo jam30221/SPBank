@@ -812,6 +812,32 @@ body.drawer-opened .hamburger { visibility: hidden; }
   background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+/* Modal for inline tax verification */
+.modal {
+  position: fixed;
+  left: 0; top: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  z-index: 3000;
+}
+.modal.hidden { display: none; }
+.modal-content {
+  background: #fff;
+  padding: 22px;
+  border-radius: 10px;
+  width: 420px;
+  max-width: calc(100% - 40px);
+  box-shadow: 0 8px 30px rgba(2,34,68,0.12);
+  position: relative;
+}
+.modal-close {
+  position: absolute; top: 10px; right: 10px; background: transparent; border: none; font-size: 22px; cursor: pointer;
+}
+.link-button { background: none; border: none; padding: 0; color: #f0a500; cursor: pointer; font-weight: 700; }
+.muted { color: #6b778c; margin: 6px 0 12px; }
+
 /* Professional signup styling */
 .signup-container {
   display: flex;
