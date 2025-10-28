@@ -3,9 +3,14 @@
 <head>
   <meta charset="utf-8">
   <title>{{ SITE_NAME }}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Open+Sans&display=swap" rel="stylesheet">
+  <!-- Favicon / tab icon: show bank logo in browser tab -->
+  <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo.png') }}">
+  <meta name="theme-color" content="#002b5c">
 </head>
 <body class="theme">
 
@@ -46,6 +51,52 @@
   </ul>
 </nav>
 {% endif %}
+
+{% if 'user' in session %}
+  <!-- Top blue header for authenticated users (hamburger + welcome) -->
+  <header class="login-header">
+    <button class="hamburger" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">
+      <span class="hamburger-box">
+        <span class="hamburger-inner"></span>
+      </span>
+    </button>
+    <div class="welcome-text">Welcome, {{ session.get('user', '') }}</div>
+
+    <!-- header-actions removed: avatar is now shown inside the drawer for consistency -->
+  </header>
+
+  <!-- Sidebar drawer (global) -->
+  <aside id="sideMenu" class="nav-drawer" aria-hidden="true">
+    <!-- Static close button inside the drawer (visible when open). Keeps the X pinned top-left inside the drawer. -->
+    <button id="drawer-close" class="drawer-close" aria-label="Close menu">&times;</button>
+
+    <!-- Avatar block inside drawer (above the username) -->
+    <div class="drawer-avatar">
+      <img id="drawer-user-avatar" src="{{ avatar_url() }}" alt="Profile avatar">
+      <div class="drawer-username">{{ session.get('user', '') }}</div>
+      <div class="drawer-avatar-actions">
+        <button type="button" onclick="viewAvatar()">View</button>
+        <form action="{{ url_for('upload_avatar') }}" method="POST" enctype="multipart/form-data" style="display:inline-block;margin:0;">
+          <input type="file" id="drawer-avatar-upload" name="avatar" accept="image/*" style="display:none;" onchange="this.form.submit()">
+          <button type="button" onclick="document.getElementById('drawer-avatar-upload').click()">Change</button>
+        </form>
+        <form action="{{ url_for('remove_avatar') }}" method="POST" style="display:inline-block;margin:0;">
+          <button type="submit">Remove</button>
+        </form>
+      </div>
+    </div>
+    <a class="side-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a class="side-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Home</a>
+    <a class="side-link" href="{{ url_for('accounts') }}">My Accounts</a>
+    <a class="side-link" href="{{ url_for('deposits') }}">Deposits</a>
+    <a class="side-link" href="{{ url_for('withdrawals') }}">Withdrawals</a>
+    <a class="side-link" href="{{ url_for('transfers') }}">Transfers</a>
+    <a class="side-link" href="{{ url_for('history') }}">Transaction History</a>
+    <a class="side-link" href="{{ url_for('reports') }}">Reports</a>
+    <a class="side-link" href="{{ url_for('logout') }}">Log Out</a>
+  </aside>
+{% endif %}
+
 
 
 <main class="container">
@@ -181,16 +232,74 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 <script>
-function toggleMenu() {
-  document.getElementById("sideMenu").classList.toggle("open");
-}
+// Add event listener when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  const hamburger = document.querySelector('.hamburger');
+  if (!hamburger) return;
 
-// Close menu if clicking outside
-document.addEventListener("click", function(event) {
-  const menu = document.getElementById("sideMenu");
-  const hamburger = document.querySelector(".hamburger");
-  if (menu.classList.contains("open") && !menu.contains(event.target) && !hamburger.contains(event.target)) {
-    menu.classList.remove("open");
+  function closeGlobalMenu() {
+    const sideMenu = document.getElementById('sideMenu');
+    if (sideMenu && sideMenu.classList.contains('open')) {
+      sideMenu.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
+        hamburger.classList.remove('open');
+      sideMenu.setAttribute('aria-hidden', 'true');
+    }
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar && !sidebar.classList.contains('closed')) {
+      sidebar.classList.add('closed');
+      const main = document.querySelector('.mainpanel');
+      if (main) main.classList.add('expanded');
+        hamburger.setAttribute('aria-expanded', 'false');
+        hamburger.classList.remove('open');
+    }
+  }
+
+  hamburger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const sideMenu = document.getElementById('sideMenu');
+    const sidebar = document.querySelector('.sidebar');
+    if (sideMenu) {
+      sideMenu.classList.toggle('open');
+      const isExpanded = sideMenu.classList.contains('open');
+        hamburger.setAttribute('aria-expanded', isExpanded);
+        sideMenu.setAttribute('aria-hidden', !isExpanded);
+        // toggle icon open state
+        hamburger.classList.toggle('open', isExpanded);
+        // when global drawer opens, pin an explicit body class so CSS can hide the header hamburger
+        document.body.classList.toggle('drawer-opened', isExpanded);
+    } else if (sidebar) {
+      sidebar.classList.toggle('closed');
+      const main = document.querySelector('.mainpanel');
+      if (main) main.classList.toggle('expanded');
+      const isExpanded = !sidebar.classList.contains('closed');
+        hamburger.setAttribute('aria-expanded', isExpanded);
+        hamburger.classList.toggle('open', isExpanded);
+    }
+  });
+
+  // Close when clicking outside either menu
+  document.addEventListener('click', function(event) {
+    const sideMenu = document.getElementById('sideMenu');
+    const sidebar = document.querySelector('.sidebar');
+    if (sideMenu && sideMenu.classList.contains('open')) {
+      if (!sideMenu.contains(event.target) && !hamburger.contains(event.target)) {
+        closeGlobalMenu();
+      }
+    } else if (sidebar && !sidebar.classList.contains('closed')) {
+      if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+        closeGlobalMenu();
+      }
+    }
+  });
+
+  // Drawer close button (pinned X inside drawer)
+  const drawerClose = document.getElementById('drawer-close');
+  if (drawerClose) {
+    drawerClose.addEventListener('click', function(e) {
+      e.stopPropagation();
+      closeGlobalMenu();
+    });
   }
 });
 </script>
@@ -238,6 +347,27 @@ function viewAvatar() {
   const avatar = document.getElementById('user-avatar').src;
   window.open(avatar, '_blank');
 }
+</script>
+<script>
+function toggleHeaderAvatarMenu() {
+  const m = document.getElementById('header-avatar-menu');
+  if (!m) return;
+  m.classList.toggle('hidden');
+}
+function viewHeaderAvatar() {
+  const avatar = document.getElementById('header-avatar').src;
+  window.open(avatar, '_blank');
+}
+
+// Close header avatar menu when clicking outside
+document.addEventListener('click', function(e) {
+  const m = document.getElementById('header-avatar-menu');
+  const img = document.getElementById('header-avatar');
+  if (!m || !img) return;
+  if (!m.classList.contains('hidden') && !m.contains(e.target) && !img.contains(e.target)) {
+    m.classList.add('hidden');
+  }
+});
 </script>
 </body>
 </html>

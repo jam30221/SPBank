@@ -4,7 +4,7 @@
   --navy: #0d2a4a;
   --blue: #1976d2;
   --light-bg: #f5f8fb;
-  --card: #ffffff;
+  --card: #ffffffea;
   --text: #0e1b2a;
   --muted: #6b778c;
   --danger: #c62828;
@@ -111,7 +111,7 @@ body.theme {
 
 /* Testimonials */
 .testimonials {
-  background: #f8f9fa;
+  background: #f8f9fa1e;
   padding: 60px 20px;
   text-align: center;
 }
@@ -120,7 +120,7 @@ body.theme {
 .dots { margin-top: 15px; }
 .dots span {
   height: 12px; width: 12px; margin: 0 4px;
-  background-color: #bbb; border-radius: 50%;
+  background-color: #bbbbbb9f; border-radius: 50%;
   display: inline-block; cursor: pointer;
 }
 .dots .active { background-color: #002b5c; }
@@ -131,7 +131,7 @@ body.theme {
   display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;
 }
 .staff-member {
-  background: #fff; padding: 20px; border-radius: 8px;
+  background: #ffffff8a; padding: 20px; border-radius: 8px;
   width: 220px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 .staff-member img {
@@ -141,7 +141,7 @@ body.theme {
 .staff-member p { font-size: 14px; color: #555; }
 
 .vision {
-  background: #fff;
+  background: #ffffff00;
   padding: 60px 20px;
   text-align: center;
   max-width: 900px;
@@ -150,13 +150,13 @@ body.theme {
   box-shadow: var(--shadow);
 }
 .vision h2 {
-  color: #002b5c;
+  color: #080670;
   margin-bottom: 20px;
 }
 .vision p {
   font-size: 18px;
   line-height: 1.6;
-  color: #333;
+  color: #cfcaca;
 }
 
 .about {
@@ -221,7 +221,7 @@ body.theme {
 .testimonial-row.show { opacity: 1; }
 
 .testimonial {
-  background: #fff;
+  background: #ffffff70;
   padding: 20px;
   border-radius: 8px;
   width: 250px;
@@ -328,30 +328,177 @@ body.theme {
   font-weight: bold;
 }
 
-/* Side menu */
-.side-menu {
+/* Hamburger Button */
+.hamburger {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 12px;
+  display: inline-flex;
+  align-items: center;
+  position: absolute; /* place relative to nearest positioned ancestor (e.g. .login-header) */
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1100;
+}
+
+.hamburger-box {
+  width: 30px;
+  height: 24px;
+  display: inline-block;
+  position: relative;
+}
+
+.hamburger-inner {
+  display: block;
+  top: 50%;
+  margin-top: -2px;
+}
+
+.hamburger-inner, .hamburger-inner::before, .hamburger-inner::after {
+  width: 30px;
+  height: 3px;
+  background-color: #ffffff; /* white lines to show on deep-blue header */
+  border-radius: 4px;
+  position: absolute;
+  transition: transform 0.15s ease;
+}
+
+.hamburger-inner::before, .hamburger-inner::after {
+  content: "";
+  display: block;
+}
+
+.hamburger-inner::before {
+  top: -10px;
+}
+
+.hamburger-inner::after {
+  bottom: -10px;
+}
+
+/* Header avatar (right side) */
+.header-actions { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 8px; }
+.header-avatar-img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); cursor: pointer; }
+
+/* specific positioning for header avatar menu */
+#header-avatar-menu { top: 60px; right: 18px; left: auto; }
+
+/* Open (X) animation */
+.hamburger.open .hamburger-inner {
+  background-color: transparent; /* hide middle bar */
+}
+.hamburger.open .hamburger-inner::before {
+  transform: translateY(10px) rotate(45deg);
+}
+.hamburger.open .hamburger-inner::after {
+  transform: translateY(-10px) rotate(-45deg);
+}
+.hamburger-inner, .hamburger-inner::before, .hamburger-inner::after {
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+/* Side Navigation Drawer */
+.nav-drawer {
   position: fixed;
-  top: 60px; /* just below contact bar */
-  left: -220px;
-  width: 200px;
+  top: 0;
+  left: 0;
+  width: 250px;
   height: 100%;
   background: #002b5c;
-  padding: 20px;
-  transition: left 0.3s ease;
-  display: flex;
-  flex-direction: column;
+  padding-top: 60px;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+  overflow-y: auto;
 }
-.side-menu a {
+
+.nav-drawer.open {
+  transform: translateX(0);
+  box-shadow: 2px 0 12px rgba(0,0,0,0.2);
+}
+
+/* When drawer is open, hide the header hamburger so the X inside the drawer is the visible control */
+body.drawer-opened .hamburger { visibility: hidden; }
+
+/* Drawer Links */
+.nav-drawer .side-link {
+  display: block;
+  padding: 15px 25px;
   color: #fff;
   text-decoration: none;
-  margin: 10px 0;
+  font-size: 16px;
+  transition: background-color 0.2s;
 }
-.side-menu a:hover {
-  text-decoration: underline;
+
+.nav-drawer .side-link:hover,
+.nav-drawer .side-link.active {
+  background: rgba(255,255,255,0.1);
 }
-.side-menu.open {
-  left: 0;
+
+.nav-drawer .sidebar-title {
+  color: #fff;
+  padding: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
+
+/* Close button anchored inside the drawer (top-left) when drawer is open */
+.drawer-close {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  background: transparent;
+  color: #fff;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  padding: 6px 8px;
+  cursor: pointer;
+  display: none; /* shown only when drawer is open */
+  z-index: 1200;
+}
+.nav-drawer.open .drawer-close { display: block; }
+
+/* Drawer avatar block (placed at top of drawer) */
+.drawer-avatar {
+  text-align: center;
+  padding: 18px 12px 6px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.drawer-avatar img {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,0.12);
+  display: inline-block;
+}
+.drawer-username {
+  color: #fff;
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: 15px;
+}
+.drawer-avatar-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.drawer-avatar-actions button {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.drawer-avatar-actions button:hover { background: rgba(255,255,255,0.12); }
 
 .error-msg {
   color: red;
@@ -442,6 +589,10 @@ body.theme {
   font-weight: bold;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
+
+/* Make summary grid wrap on smaller screens to avoid horizontal scroll */
+.summary-grid { flex-wrap: wrap; }
+.summary-card { min-width: 200px; }
 .summary-card.red { background: #d9534f; }
 .summary-card.green { background: #5cb85c; }
 .summary-card.yellow { background: #f0ad4e; color: #222; }
@@ -467,10 +618,10 @@ body.theme {
   text-align: left;
 }
 .tx-table th {
-  background: #f5f5f5;
+  background: #463a3a54;
 }
 .tx-table tr:nth-child(even) {
-  background: #fafafa;
+  background: #ffffff;
 }
 .tx-table .success { color: green; font-weight: bold; }
 .tx-table .pending { color: orange; font-weight: bold; }
@@ -524,6 +675,24 @@ body.theme {
 
 .mainpanel.expanded {
   margin-left: 0; /* when sidebar is closed */
+}
+
+/* Responsive sidebar behaviour: hide sidebar on narrow screens and use hamburger */
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-220px);
+    position: fixed;
+    z-index: 1000;
+  }
+  .sidebar.closed {
+    transform: translateX(-220px);
+  }
+  .mainpanel {
+    margin-left: 0;
+  }
+  .mainpanel.expanded {
+    margin-left: 0;
+  }
 }
 .avatar {
   text-align: center;
@@ -642,6 +811,36 @@ body.theme {
   max-width: 600px; margin: 20px auto; padding: 20px;
   background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+
+/* Professional signup styling */
+.signup-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+  background: linear-gradient(180deg, #f6fbfc 0%, #ffffff 100%);
+}
+.signup-card {
+  width: 720px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(2,34,68,0.08);
+  padding: 28px;
+  border: 1px solid rgba(10,42,102,0.06);
+}
+.signup-card h3 { margin-top: 0; color: #0a2a66; font-size: 22px; }
+.signup-card label { display: block; margin-top: 12px; font-weight: 600; color: #23354a; }
+.signup-card input[type="text"], .signup-card input[type="email"], .signup-card input[type="password"], .signup-card input[type="tel"], .signup-card input[type="date"] {
+  width: 100%; padding: 10px 12px; margin-top: 6px; border: 1px solid #d8e3f0; border-radius: 6px; background: #fbfdff;
+}
+.signup-card .progressbar { margin-bottom: 18px; }
+.signup-card .btn.primary {
+  margin-top: 18px; width: 100%; padding: 12px; background: linear-gradient(90deg,#0a2a66,#123a88); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
+}
+.signup-card .btn.primary:hover { opacity: 0.95; }
+
+@media (max-width: 800px) {
+  .signup-card { width: 95%; padding: 18px; }
+}
 .transfer-form h2 { text-align: center; margin-bottom: 20px; }
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
@@ -707,7 +906,7 @@ body.theme {
 
 /* Optional overlay for readability */
 .hero-overlay {
-  background: rgba(0,0,0,0.4);  /* semi-transparent dark layer */
+  background: rgba(0, 0, 0, 0.164);  /* semi-transparent dark layer */
   padding: 2rem;
   text-align: center;
   border-radius: 6px;
@@ -727,3 +926,17 @@ body.theme {
   text-shadow: 0 2px 6px rgba(0,0,0,0.7);
 }
 
+.white-background-section {
+    background-image: url('bg1.webp'); /* replace with your file path */
+    background-size: cover;       /* ensures it fills the whole area */
+    background-position: center;  /* keeps it centered */
+    background-repeat: no-repeat; /* prevents tiling */
+}
+
+.nav-drawer {
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+}
+.nav-drawer.open {
+  transform: translateX(0);
+}

@@ -1,5 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
+<!-- Top header for quick navigation (hamburger + drawer) -->
+<header class="login-header">
+  <button class="hamburger" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">
+    <span class="hamburger-box">
+      <span class="hamburger-inner"></span>
+    </span>
+  </button>
+  <div class="welcome-text">Abouts</div>
+  <nav id="sideMenu" class="nav-drawer" aria-hidden="true">
+    <div class="sidebar-title">Menu</div>
+    <a class="side-link" href="{{ url_for('index') }}">Home</a>
+    <a class="side-link" href="{{ url_for('about') }}">About</a>
+    <a class="side-link" href="{{ url_for('login_view') }}">Login</a>
+    <a class="side-link" href="{{ url_for('signup') }}">Register</a>
+    <a class="side-link" href="{{ url_for('support') }}">Support</a>
+  </nav>
+</header>
+
 <section class="about">
   <h2>About Spartex Private Banking</h2>
   <p>
@@ -14,7 +32,7 @@
 
   <div class="contact-info">
     <h3>Contact Us</h3>
-    <p>📞 +1 (800) 123‑4567</p>
+    <p>📞 +7 (495) 8352434</p>
     <p>✉️ support@spartexbank.com</p>
   </div>
 </section>

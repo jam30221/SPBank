@@ -20,19 +20,24 @@
 
 <!-- Login page header -->
 <header class="login-header">
-  <!-- Hamburger menu -->
-  <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+  <!-- Hamburger button (uses global JS/CSS) -->
+  <button class="hamburger" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">
+    <span class="hamburger-box">
+      <span class="hamburger-inner"></span>
+    </span>
+  </button>
 
   <!-- Centered welcome text -->
   <h3 class="welcome-text">Welcome! Login Now</h3>
 
   <!-- Hidden nav menu (slides out when hamburger clicked) -->
-  <nav id="sideMenu" class="side-menu">
-    <a href="/">Home</a>
-    <a href="/about">About</a>
-    <a href="/login">Login</a>
-    <a href="/signup">Register</a>
-    <a href="/support">Support</a>
+  <nav id="sideMenu" class="nav-drawer" aria-hidden="true">
+    <div class="sidebar-title">Menu</div>
+    <a class="side-link" href="/">Home</a>
+    <a class="side-link" href="/about">About</a>
+    <a class="side-link" href="/login">Login</a>
+    <a class="side-link" href="/signup">Register</a>
+    <a class="side-link" href="/support">Support</a>
   </nav>
 </header>
 

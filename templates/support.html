@@ -1,5 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
+<!-- Top header for quick navigation (hamburger + drawer) -->
+<header class="login-header">
+  <button class="hamburger" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">
+    <span class="hamburger-box">
+      <span class="hamburger-inner"></span>
+    </span>
+  </button>
+  <div class="welcome-text">Support</div>
+  <nav id="sideMenu" class="nav-drawer" aria-hidden="true">
+    <div class="sidebar-title">Menu</div>
+    <a class="side-link" href="{{ url_for('index') }}">Home</a>
+    <a class="side-link" href="{{ url_for('about') }}">About</a>
+    <a class="side-link" href="{{ url_for('login_view') }}">Login</a>
+    <a class="side-link" href="{{ url_for('signup') }}">Register</a>
+    <a class="side-link" href="{{ url_for('support') }}">Support</a>
+  </nav>
+</header>
+
 <section class="support-form">
   <h2>Submit a Complaint</h2>
   <form method="post" action="/support">

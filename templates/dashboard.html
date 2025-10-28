@@ -1,12 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<!-- Header -->
-<div class="login-header">
-  <!-- Hamburger button -->
-  <span class="hamburger" onclick="toggleSidebar()">☰</span>
-</div>
-
-
+<div class="dashboard">
 <div class="dashboard">
 
   <!-- Sidebar -->
@@ -14,10 +8,7 @@
     <div class="avatar">
       <div class="avatar" onclick="toggleAvatarMenu()">
   <form action="{{ url_for('upload_avatar') }}" method="POST" enctype="multipart/form-data">
-    <label for="avatar-upload">
-      <img id="user-avatar"
-           src="{{ url_for('static', filename='uploads/avatars/' + user.get('avatar', 'default-avatar.png')) }}"
-           alt="User Avatar">
+    <img id="user-avatar" src="{{ avatar_url(user.get('avatar')) }}" alt="User Avatar">
     </div>
 
   <div id="avatar-menu" class="avatar-menu hidden">
@@ -81,7 +72,7 @@
     <table class="tx-table">
       <thead>
         <tr>
-          <th>No.</th>
+          <th>Acc Number</th>
           <th>Transaction Type</th>
           <th>Amount</th>
           <th>Status</th>
@@ -110,16 +101,16 @@
         <td>{{ tx.created_at }}</td>
       </tr>
      {% endfor %}
-        <tr><td>1</td><td>Transfer</td><td>US$ 15,000</td><td class="pending">Pending</td><td>James Miles</td><td>17-Oct-2020</td></tr>
-        <tr><td>2</td><td>Deposit</td><td>US$ 1,200</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
-        <tr><td>3</td><td>Deposit</td><td>US$ 1,500</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
-        <tr><td>4</td><td>Deposit</td><td>US$ 2,000</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
-        <tr><td>5</td><td>Deposit</td><td>US$ 1,500</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
-        <tr><td>6</td><td>Deposit</td><td>US$ 1,200</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
-        <tr><td>7</td><td>Deposit</td><td>US$ 1,500</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
-        <tr><td>8</td><td>Deposit</td><td>US$ 2,000</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
-        <tr><td>9</td><td>Deposit</td><td>US$ 1,500</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
-        <tr><td>10</td><td>Deposit</td><td>US$ 1,200</td><td class="success">Success</td><td>James Miles</td><td>17-Oct-2020</td></tr>
+        <tr><td>2902825255</td><td>Transfer</td><td>US$ 55,000</td><td class="pending">Pending</td><td>Kathi Schrader</td><td>14-Aug-2025 08:10:10</td></tr>
+        <tr><td>7659004281</td><td>Deposit</td><td>US$ 10,200</td><td class="success">Success</td><td>James Whilfred</td><td>17-Jul-2025 10:12:03</td></tr>
+        <tr><td>7659004281</td><td>Deposit</td><td>US$ 50,500</td><td class="success">Success</td><td>James Whilfred</td><td>20-Oct-2025 11:10:15</td></tr>
+        <tr><td>1400902187</td><td>Deposit</td><td>US$ 102,000</td><td class="success">Success</td><td> Mariners corps.</td><td>15-Jun-2025 12:33:10</td></tr>
+        <tr><td>8712525188</td><td>Deposit</td><td>US$ 6,217,500</td><td class="success">Success</td><td>livelong insurance Inc.</td><td>17-Oct-2020 06:10:10</td></tr>
+        <tr><td>0052006077</td><td>Deposit</td><td>US$ 5,200,710</td><td class="success">Success</td><td>Crypto.com</td><td>19-Mar-2020 11:47:22</td></tr>
+        <tr><td>1561421330</td><td>Transfer</td><td>US$ 20,500</td><td class="success">Success</td><td>High ends Intl.</td><td>21-Nov-2020 03:15:18</td></tr>
+        <tr><td>1766582990</td><td>Deposit</td><td>US$ 202,000</td><td class="success">Success</td><td>James Whilfred</td><td>1-Oct-2020 05:10:57</td></tr>
+        <tr><td>9027776501</td><td>Deposit</td><td>US$ 55,000</td><td class="success">Success</td><td>Mariners Support USA.</td><td>18-Jun-2020 08:57:11</td></tr>
+        <tr><td>4000165480</td><td>Deposit</td><td>US$ 2,200,360</td><td class="success">Success</td><td>Interests.</td><td>17-Oct-2020 10:29:19</td></tr>
       </tbody>
     </table>
 
@@ -135,9 +126,9 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>oAuLzZG6EoHQPBrgetxX</td><td>765904281</td><td>Deposit</td><td>US$ 289.121</td></tr>
-        <tr><td>f4jiL8QWcPmRo8cafvdE</td><td>765904281</td><td>Deposit</td><td>US$ 289.121</td></tr>
-        <tr><td>6a1nP1zPnAS8gry4MfW1</td><td>765904281</td><td>Withdrawal</td><td>US$ 15,000</td></tr>
+        <tr><td>oAuLzZG6EoHQPBrgetxX</td><td>7659004281</td><td>Deposit</td><td>US$ 289.121</td></tr>
+        <tr><td>f4jiL8QWcPmRo8cafvdE</td><td>7659004281</td><td>Deposit</td><td>US$ 289.121</td></tr>
+        <tr><td>6a1nP1zPnAS8gry4MfW1</td><td>7659004281</td><td>Withdrawal</td><td>US$ 15,000</td></tr>
       </tbody>
     </table>
 
@@ -147,12 +138,17 @@
 <script>
 function toggleSidebar() {
   document.querySelector('.sidebar').classList.toggle('closed');
+  // shift main panel to fill space when sidebar is closed
+  const main = document.querySelector('.mainpanel');
+  if (main) main.classList.toggle('expanded');
 }
 document.addEventListener('click', function(e) {
   const sidebar = document.querySelector('.sidebar');
   const hamburger = document.querySelector('.hamburger');
   if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
     sidebar.classList.add('closed');
+    const main = document.querySelector('.mainpanel');
+    if (main) main.classList.add('expanded');
   }
 });
 </script>

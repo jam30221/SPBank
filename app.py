@@ -5,6 +5,7 @@ import string
 import uuid
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import json, os
+import shutil
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
@@ -87,6 +88,8 @@ def login_view():
 
         if user and user["password"] == password and user["pin"] == pin:
             session["user"] = username   # store logged-in user
+            # store avatar in session for header display (use ProfileAvatar.png default)
+            session["avatar"] = user.get("avatar", "ProfileAvatar.png")
             session["attempts"] = 5      # reset attempts
             return redirect(url_for("dashboard"))  # ✅ correct target
         else:
@@ -155,6 +158,28 @@ def inject_globals():
         "CONTACT_EMAIL": CONTACT_EMAIL,
         "fmt_amount": fmt_amount
     }
+
+
+# Helper to resolve avatar URL (search uploads first, then static root)
+@app.context_processor
+def avatar_helpers():
+    def avatar_url(avatar_filename=None):
+        # prefer explicit filename passed in, else session, else default
+        av = avatar_filename or session.get('avatar') or 'ProfileAvatar.png'
+        # candidate paths
+        uploads_path = os.path.join(app.static_folder, 'uploads', 'avatars', av)
+        root_path = os.path.join(app.static_folder, av)
+        try:
+            if av and os.path.exists(uploads_path):
+                return url_for('static', filename=os.path.join('uploads', 'avatars', av))
+            if av and os.path.exists(root_path):
+                return url_for('static', filename=av)
+        except Exception:
+            # fallback if anything goes wrong with filesystem access
+            pass
+        return url_for('static', filename='ProfileAvatar.png')
+
+    return { 'avatar_url': avatar_url }
 
 # In-memory data (we’ll move to SQLite next)
 users = {
@@ -419,6 +444,8 @@ def transfers():
             "recipient_number": recipient_number,
             "amount": amount,
         }
+        # Keep a local reference to the details we just stored in session
+        details = session.get("pending_transfer", {})
 
         # Create a new pending transaction in JSON
         transactions = load_transactions()
@@ -427,21 +454,28 @@ def transfers():
             "id": new_id,
             "user": session["user"],
             "type": "transfer",
-            "recipient": f"{details['first_name']} {details['last_name']}",
-            "bank_name": details["bank_name"],
-            "amount": details["amount"],
+            "recipient": f"{details.get('first_name', '')} {details.get('last_name', '')}",
+            "bank_name": details.get("bank_name"),
+            "amount": details.get("amount"),
             "status": "pending_tax",
-            "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         transactions.append(new_tx)
         save_transactions(transactions)
 
-        # Insert into DB as "pending_tax"
-        db.execute(
-            "INSERT INTO transactions (user_id, recipient, bank_name, amount, status) VALUES (?, ?, ?, ?, ?)",
-            (session["user_id"], f"{details['first_name']} {details['last_name']}", details["bank_name"], details["amount"], "pending_tax")
-        )
-        db.commit()
+        # NOTE: this script does not configure a DB connection named `db`.
+        # If you have a database and a `db` connection, uncomment and adapt the
+        # following block. For now we skip DB persistence to avoid NameError.
+        #
+        # try:
+        #     db.execute(
+        #         "INSERT INTO transactions (user_id, recipient, bank_name, amount, status) VALUES (?, ?, ?, ?, ?)",
+        #         (session.get("user_id"), f"{details.get('first_name', '')} {details.get('last_name', '')}", details.get("bank_name"), details.get("amount"), "pending_tax")
+        #     )
+        #     db.commit()
+        # except NameError:
+        #     # No DB configured; JSON file already updated above
+        #     pass
 
         # Redirect to tax code page
         return redirect(url_for("transfer_tax", tx_id=new_id))
@@ -517,6 +551,25 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+
+def ensure_default_avatar_in_uploads():
+    """Ensure the uploads/avatars folder exists and contains ProfileAvatar.png.
+    This makes the default avatar available at the uploads path so templates
+    that expect files there won't show a broken image.
+    """
+    static_folder = app.static_folder or 'static'
+    target_dir = os.path.join(static_folder, 'uploads', 'avatars')
+    os.makedirs(target_dir, exist_ok=True)
+
+    src = os.path.join(static_folder, 'ProfileAvatar.png')
+    dst = os.path.join(target_dir, 'ProfileAvatar.png')
+    try:
+        if os.path.exists(src) and not os.path.exists(dst):
+            shutil.copyfile(src, dst)
+    except Exception:
+        # Non-fatal: if copy fails, templates still fall back to static/ProfileAvatar.png
+        pass
+
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -549,6 +602,9 @@ def upload_avatar():
                 break
         save_users(users)
 
+        # Update session avatar so header shows new picture immediately
+        session["avatar"] = filename
+
         flash("Avatar updated successfully!", "success")
     else:
         flash("Invalid file type. Allowed: png, jpg, jpeg, gif", "danger")
@@ -576,7 +632,9 @@ def remove_avatar():
                 break
         save_users(users)
 
-        flash("Avatar removed, reverted to default.", "info")
+    # Update session avatar to default so header updates immediately
+    session["avatar"] = "ProfileAvatar.png"
+    flash("Avatar removed, reverted to default.", "info")
 
     return redirect(url_for("dashboard"))
     
@@ -587,6 +645,8 @@ def home():
 
 
 if __name__ == "__main__":
+    # Ensure uploads folder and default avatar are present before serving
+    ensure_default_avatar_in_uploads()
     app.run(debug=True)
 
 
