@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from datetime import datetime
 import time
 import random
@@ -275,11 +275,16 @@ def dashboard():
     # recent transactions from the transactions.json file for this user
     transactions = load_transactions()
     user_tx = [tx for tx in transactions if tx.get("user") == uname]
+    # also expose all persisted transactions to the dashboard so it can render
+    # a transaction history block (Recent + Pending) without additional requests
+    persisted_transactions = transactions
 
     if "login_time" not in session:
         session["login_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if request.method == "POST":
+        # use a consistent timestamp for any transaction created during this POST
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         action = request.form.get("action")
         amount_raw = request.form.get("amount", "").strip()
         recipient = request.form.get("recipient", "").strip()
@@ -382,6 +387,13 @@ def dashboard():
     user_list = [u["username"] for u in load_users() if u["username"] != uname]
     login_time = session.get("login_time", None)
 
+    # Allow the history page to link back into the dashboard and open the
+    # pending transfer tax modal. History provides amount/recipient via query
+    # string when linking the example Kathi row.
+    open_pending = request.args.get('open_pending')
+    open_pending_amount = request.args.get('amount')
+    open_pending_recipient = request.args.get('recipient')
+
     return render_template(
         "dashboard.html",
         user=user,
@@ -389,8 +401,12 @@ def dashboard():
         summary=summary,
         latest=latest,
         transactions=user_tx,
+        persisted_transactions=persisted_transactions,
         user_list=user_list,
-        login_time=login_time
+        login_time=login_time,
+        open_pending=open_pending,
+        open_pending_amount=open_pending_amount,
+        open_pending_recipient=open_pending_recipient
     )
 
 # Sidebar pages (scaffold)
@@ -578,7 +594,35 @@ def history():
 
     uname = session["user"]
     user = get_user_by_username(uname)
-    return render_template("history.html", transactions=user["transactions"], username=uname)
+    # Also include persisted transactions (pending or pending_tax) so the history
+    # page can show Recent and Pending separately.
+    persisted = [t for t in load_transactions() if t.get('user') == uname]
+    # Identify pending items explicitly so template logic is simpler and robust
+    pending = [t for t in persisted if str(t.get('status','')).lower() in ('pending','pending_tax')]
+    return render_template(
+        "history.html",
+        transactions=user["transactions"],
+        persisted_transactions=persisted,
+        pending_transactions=pending,
+        username=uname
+    )
+
+
+@app.route('/api/transactions')
+def api_transactions():
+    """Return JSON containing the user's recent transactions (from users.json)
+    and persisted transactions (from transactions.json). Used by client-side
+    history modal so the hamburger menu can show recent + pending items.
+    """
+    if 'user' not in session:
+        return jsonify({'error': 'not authenticated'}), 401
+    uname = session['user']
+    user = get_user_by_username(uname) or { 'transactions': [] }
+    stored = [t for t in load_transactions() if t.get('user') == uname]
+    return jsonify({
+        'user_transactions': user.get('transactions', []),
+        'stored_transactions': stored
+    })
 
 
 @app.route("/reports")

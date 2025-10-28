@@ -1,28 +1,116 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="card">
-  <h2>Transaction History - {{ username }}</h2>
-  <table class="tx-table">
-    <thead>
-      <tr>
-        <th>Checksum</th>
-        <th>Type</th>
-        <th>Amount</th>
-        <th>Status</th>
-        <th>Timestamp</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for t in transactions %}
-      <tr>
-        <td class="mono">{{ t.checksum }}</td>
-        <td>{{ t.type }}</td>
-        <td>{{ fmt_amount(t.amount) }}</td>
-        <td>{{ t.status }}</td>
-        <td>{{ t.timestamp }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <h2>Transaction History — {{ username }}</h2>
+
+  <section id="pending">
+    <h3>Pending</h3>
+    {% if pending_transactions and pending_transactions|length > 0 %}
+      <table class="tx-table">
+        <thead>
+          <tr>
+            <th>Acc #</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Recipient</th>
+            <th>Owner</th>
+            <th>Created</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in pending_transactions %}
+          <tr>
+            <td>{{ p.account_number or '-' }}</td>
+            <td>{{ p.type }}</td>
+            <td>{{ fmt_amount(p.amount) }}</td>
+            <td class="pending">{{ p.status }}</td>
+            <td>{{ p.recipient }}</td>
+            <td>{{ p.user or '-' }}</td>
+            <td>{{ p.created_at }}</td>
+            <td>
+              <a class="btn-primary" href="{{ url_for('transfer_tax') }}?tx_id={{ p.id }}">Complete</a>
+            </td>
+          </tr>
+          {% endfor %}
+          <!-- Kathi Schrader example (explicitly shown under Pending) -->
+          <tr>
+            <td>2902825255</td>
+            <td>Transfer</td>
+            <td>{{ fmt_amount(55000) }}</td>
+            <td class="pending">pending_tax</td>
+            <td>Kathi Schrader</td>
+            <td>-</td>
+            <td>14-Aug-2025 08:10:10</td>
+            <td>
+              <a class="btn-primary" href="{{ url_for('dashboard') }}?open_pending=1&amount=55000&recipient=Kathi%20Schrader">Complete</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No pending transactions.</p>
+    {% endif %}
+  </section>
+
+  <section id="recent" style="margin-top:18px;">
+    <h3>Recent Transactions</h3>
+    {% if transactions and transactions|length > 0 %}
+      <table class="tx-table">
+        <thead>
+          <tr>
+            <th>Acc #</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Owner</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in transactions %}
+          <tr>
+            <td>{{ t.account_number or '-' }}</td>
+            <td>{{ t.type }}</td>
+            <td>{{ fmt_amount(t.amount) }}</td>
+            <td class="{{ 'success' if t.status and t.status.lower() == 'success' else 'pending' }}">{{ t.status }}</td>
+            <td>{{ t.user or '-' }}</td>
+            <td>{{ t.created_at or t.timestamp or '-' }}</td>
+          </tr>
+          {% endfor %}
+
+          <!-- long-roll static rows restored to match dashboard -->
+          <tr>
+            <td>7659004281</td>
+            <td>Deposit</td>
+            <td>US$ 10,200</td>
+            <td class="success">Success</td>
+            <td>James Whilfred</td>
+            <td>17-Jul-2025 10:12:03</td>
+          </tr>
+          <tr>
+            <td>8123456721</td>
+            <td>Withdrawal</td>
+            <td>US$ 1,000</td>
+            <td class="success">Success</td>
+            <td>Mariners corps.</td>
+            <td>14-Jul-2025 09:43:21</td>
+          </tr>
+          <tr>
+            <td>9201812738</td>
+            <td>Payment</td>
+            <td>US$ 2,500</td>
+            <td class="success">Success</td>
+            <td>livelong insurance Inc.</td>
+            <td>12-Jul-2025 18:33:11</td>
+          </tr>
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No recent transactions found.</p>
+    {% endif %}
+  </section>
+
 </div>
 {% endblock %}

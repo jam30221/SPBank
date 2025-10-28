@@ -1,21 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="dashboard">
-<div class="dashboard">
 
   <!-- Sidebar -->
   <aside class="sidebar closed">
 
     <div class="avatar" onclick="toggleAvatarMenu()">
-  <img id="user-avatar" src="{{ avatar_url(user.get('avatar')) }}?v={{ session.get('avatar_ts','') }}" alt="User Avatar">
+      <img id="user-avatar" src="{{ avatar_url(user.get('avatar')) }}?v={{ session.get('avatar_ts','') }}" alt="User Avatar">
     </div>
 
     <div id="avatar-menu" class="avatar-menu hidden">
       <button onclick="viewAvatar()">View Picture</button>
-        <form action="{{ url_for('upload_avatar') }}" method="POST" enctype="multipart/form-data" style="margin:0;">
-          <input type="file" id="avatar-upload" name="avatar" accept="image/*" style="display:none;" onchange="previewAndSubmit(this, 'user-avatar')">
-          <button type="button" onclick="document.getElementById('avatar-upload').click()">Change Picture</button>
-        </form>
+      <form action="{{ url_for('upload_avatar') }}" method="POST" enctype="multipart/form-data" style="margin:0;">
+        <input type="file" id="avatar-upload" name="avatar" accept="image/*" style="display:none;" onchange="previewAndSubmit(this, 'user-avatar')">
+        <button type="button" onclick="document.getElementById('avatar-upload').click()">Change Picture</button>
+      </form>
       <form action="{{ url_for('remove_avatar') }}" method="POST" style="margin:0;">
         <button type="submit">Remove Picture</button>
       </form>
@@ -37,32 +36,36 @@
   <section class="mainpanel expanded">
     <!-- Tax-code modal -->
     <div id="taxModal" class="modal hidden">
-      <div class="modal-content">
+      <div class="modal-content financial">
         <button class="modal-close" onclick="closeTaxModal()">&times;</button>
-        <h3>Complete Transfer — Tax Payment Code</h3>
-        <p id="tax-recipient" class="muted"></p>
-        <p id="tax-amount" class="muted"></p>
+        <div class="modal-header-financial">
+          <img src="{{ url_for('static', filename='logo.png') }}" alt="SPB" class="modal-bank-logo">
+          <div class="modal-title-block">
+            <div class="modal-title">Pending Transfer — Tax ID Required</div>
+            <div id="tax-recipient" class="muted small muted-tight"></div>
+          </div>
+        </div>
+        <div class="tax-amount-big" id="tax-amount">&nbsp;</div>
+        <p class="muted helper">Enter the Tax Payment ID issued for this transfer to complete and authorize the payout.</p>
         <form id="taxForm" method="POST" action="{{ url_for('transfer_tax') }}">
           <div class="form-group">
-            <label for="tax_code_modal">Tax Payment Code</label>
-            <input type="password" id="tax_code_modal" name="tax_code" required>
+            <label for="tax_code_modal">Tax Payment ID</label>
+            <input type="password" id="tax_code_modal" name="tax_code" class="tax-input" placeholder="e.g. 8-12 character code" required autofocus>
           </div>
-          <!-- Hidden fields: when opening the modal from a dashboard row that isn't backed
-               by a stored transaction we post recipient/amount so the server can complete it
-               without requiring a prior session.pending_transfer. openTaxModal() fills these. -->
           <input type="hidden" name="amount" id="tax_amount_input" value="">
           <input type="hidden" name="recipient" id="tax_recipient_input" value="">
           <div style="display:flex;gap:8px;">
-            <button type="submit" class="btn-primary">Verify & Complete Transfer</button>
+            <button type="submit" class="btn-primary financial">Verify & Complete</button>
             <button type="button" class="btn" onclick="closeTaxModal()">Cancel</button>
           </div>
         </form>
       </div>
     </div>
+
     <div class="welcome">
-      <div class="name">Welcome, James!</div>
+      <div class="name">Welcome, {{ user.username or username }}!</div>
       <div class="acct">You logged in at: {{ login_time }}</div>
-      <div class="acct">Acc Number: SPB410020019</div>
+      <div class="acct">Acc Number: {{ user.account_number or 'SPB410020019' }}</div>
       <div class="acct">Routing Number: 765904281</div>
     </div>
 
@@ -70,24 +73,27 @@
     <div class="summary-grid">
       <div class="summary-card red">
         <div class="label">Withdrawals</div>
-        <div class="value">US$ 15,000</div>
+        <div class="value">US$ {{ fmt_amount(summary.withdrawals) if summary.withdrawals else '15,000' }}</div>
       </div>
       <div class="summary-card green">
         <div class="label">Total Transfers</div>
-        <div class="value">US$ 5,150,220</div>
+        <div class="value">US$ {{ fmt_amount(summary.transfers) if summary.transfers else '5,150,220' }}</div>
       </div>
       <div class="summary-card yellow">
         <div class="label">Wallet Balance</div>
-        <div class="value">US$ 32,102,125</div>
+        <div class="value">US$ {{ fmt_amount(summary.wallet_balance) if summary.wallet_balance else '32,102,125' }}</div>
       </div>
       <div class="summary-card blue">
         <div class="label">Deposits</div>
-        <div class="value">US$ 37,267.345</div>
+        <div class="value">US$ {{ fmt_amount(summary.deposits) if summary.deposits else '37,267.345' }}</div>
       </div>
     </div>
 
     <!-- Latest Transactions -->
-    <h3 class="section-title">Latest Transactions</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h3 class="section-title" style="margin:0;">Latest Transactions</h3>
+      <a class="assist-links" href="{{ url_for('history') }}#recent">View full history</a>
+    </div>
     <table class="tx-table">
       <thead>
         <tr>
@@ -101,45 +107,53 @@
       </thead>
       <tbody>
 
-    <!-- New dynamic transactions first -->
-    {% for tx in transactions %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ tx.type }}</td>
-        <td>US$ {{ tx.amount }}</td>
-        <td>
-          {% if tx.status == "pending_tax" %}
-            <button type="button" class="pending link-button" onclick="openTaxModal({{ tx.id | tojson }}, {{ tx.amount | tojson }}, {{ tx.recipient | tojson }})">Click to complete</button>
-          {% elif tx.status == "completed" %}
-            <span class="success">Completed</span>
-          {% else %}
-            {{ tx.status }}
-          {% endif %}
-        </td>
-        <td>{{ tx.recipient }}</td>
-        <td>{{ tx.created_at }}</td>
-      </tr>
-     {% endfor %}
+        <!-- Kathi pending row at top (live) -->
         <tr>
           <td>2902825255</td>
           <td>Transfer</td>
           <td>US$ 55,000</td>
           <td>
-            <!-- Make this example pending row actionable: open tax modal with details. -->
-            <button type="button" class="pending link-button" onclick="openTaxModal(null, 55000, 'Kathi Schrader')">Click to complete</button>
+            <button type="button" class="pending link-button professional" onclick="openTaxModal(null, 55000, 'Kathi Schrader')">
+              <span class="pending-dot" aria-hidden></span>
+              <span class="pending-text">Pending — Tax ID required</span>
+            </button>
           </td>
           <td>Kathi Schrader</td>
           <td>14-Aug-2025 08:10:10</td>
         </tr>
+
+        <!-- Dynamic persisted transactions -->
+        {% for tx in transactions %}
+        <tr>
+          <td>{{ tx.account_number or '-' }}</td>
+          <td>{{ tx.type }}</td>
+          <td>US$ {{ tx.amount }}</td>
+          <td>
+            {% set st = (tx.status or '')|lower %}
+            {% if st == 'pending_tax' or st == 'pending' %}
+              <span class="pending">Pending</span>
+            {% elif st in ['completed','success'] %}
+              <span class="success">Success</span>
+            {% else %}
+              {{ tx.status }}
+            {% endif %}
+          </td>
+          <td>{{ tx.recipient }}</td>
+          <td>{{ tx.created_at or tx.timestamp }}</td>
+        </tr>
+        {% endfor %}
+
+        <!-- Historical long-roll (persisted as well) -->
         <tr><td>7659004281</td><td>Deposit</td><td>US$ 10,200</td><td class="success">Success</td><td>James Whilfred</td><td>17-Jul-2025 10:12:03</td></tr>
         <tr><td>7659004281</td><td>Deposit</td><td>US$ 50,500</td><td class="success">Success</td><td>James Whilfred</td><td>20-Oct-2025 11:10:15</td></tr>
-        <tr><td>1400902187</td><td>Deposit</td><td>US$ 102,000</td><td class="success">Success</td><td> Mariners corps.</td><td>15-Jun-2025 12:33:10</td></tr>
+        <tr><td>1400902187</td><td>Deposit</td><td>US$ 102,000</td><td class="success">Success</td><td>Mariners corps.</td><td>15-Jun-2025 12:33:10</td></tr>
         <tr><td>8712525188</td><td>Deposit</td><td>US$ 6,217,500</td><td class="success">Success</td><td>livelong insurance Inc.</td><td>17-Oct-2020 06:10:10</td></tr>
         <tr><td>0052006077</td><td>Deposit</td><td>US$ 5,200,710</td><td class="success">Success</td><td>Crypto.com</td><td>19-Mar-2020 11:47:22</td></tr>
         <tr><td>1561421330</td><td>Transfer</td><td>US$ 20,500</td><td class="success">Success</td><td>High ends Intl.</td><td>21-Nov-2020 03:15:18</td></tr>
         <tr><td>1766582990</td><td>Deposit</td><td>US$ 202,000</td><td class="success">Success</td><td>James Whilfred</td><td>1-Oct-2020 05:10:57</td></tr>
         <tr><td>9027776501</td><td>Deposit</td><td>US$ 55,000</td><td class="success">Success</td><td>Mariners Support USA.</td><td>18-Jun-2020 08:57:11</td></tr>
         <tr><td>4000165480</td><td>Deposit</td><td>US$ 2,200,360</td><td class="success">Success</td><td>Interests.</td><td>17-Oct-2020 10:29:19</td></tr>
+
       </tbody>
     </table>
 
@@ -167,7 +181,6 @@
 <script>
 function toggleSidebar() {
   document.querySelector('.sidebar').classList.toggle('closed');
-  // shift main panel to fill space when sidebar is closed
   const main = document.querySelector('.mainpanel');
   if (main) main.classList.toggle('expanded');
 }
@@ -188,7 +201,6 @@ function openTaxModal(txId, amount, recipient) {
   const modal = document.getElementById('taxModal');
   if (!modal) return;
   document.getElementById('tax-recipient').textContent = 'Recipient: ' + (recipient || '');
-  // Format amount nicely
   try {
     const n = Number(amount || 0);
     const formatted = new Intl.NumberFormat('en-US', {maximumFractionDigits:2, minimumFractionDigits: 0}).format(n);
@@ -197,19 +209,15 @@ function openTaxModal(txId, amount, recipient) {
     document.getElementById('tax-amount').textContent = 'Amount: US$ ' + (amount || '');
   }
   const form = document.getElementById('taxForm');
-  // If txId is provided, include it in the query string. If null/undefined,
-  // rely on session-based pending_transfer (set elsewhere) and post without tx_id.
   if (form) {
     if (txId === null || typeof txId === 'undefined') {
-      form.action = transferTaxBase; // no tx_id param
-      // populate hidden inputs so server can complete an ad-hoc in-session transfer
+      form.action = transferTaxBase;
       const amtInput = document.getElementById('tax_amount_input');
       const recInput = document.getElementById('tax_recipient_input');
       if (amtInput) amtInput.value = amount || '';
       if (recInput) recInput.value = recipient || '';
     } else {
       form.action = transferTaxBase + '?tx_id=' + txId;
-      // clear hidden inputs when using a stored tx id (server will rehydrate)
       const amtInput = document.getElementById('tax_amount_input');
       const recInput = document.getElementById('tax_recipient_input');
       if (amtInput) amtInput.value = '';
@@ -220,8 +228,19 @@ function openTaxModal(txId, amount, recipient) {
 }
 function closeTaxModal() {
   const modal = document.getElementById('taxModal');
-  if (!modal) return;
-  modal.classList.add('hidden');
+  if (!modal) return; modal.classList.add('hidden');
 }
+</script>
+<script>
+(function(){
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('open_pending')) {
+      const amount = params.get('amount') || '';
+      const recipient = params.get('recipient') || '';
+      document.addEventListener('DOMContentLoaded', function(){ try { openTaxModal(null, amount, recipient); } catch(e) {} });
+    }
+  } catch(e) { console.warn('Query param parsing failed', e); }
+})();
 </script>
 {% endblock %}
